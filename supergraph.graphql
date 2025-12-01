@@ -1,0 +1,198 @@
+schema
+  @link(url: "https://specs.apollo.dev/link/v1.0")
+  @link(url: "https://specs.apollo.dev/join/v0.3", for: EXECUTION)
+{
+  query: Query
+}
+
+directive @join__enumValue(graph: join__Graph!) repeatable on ENUM_VALUE
+
+directive @join__field(graph: join__Graph, requires: join__FieldSet, provides: join__FieldSet, type: String, external: Boolean, override: String, usedOverridden: Boolean) repeatable on FIELD_DEFINITION | INPUT_FIELD_DEFINITION
+
+directive @join__graph(name: String!, url: String!) on ENUM_VALUE
+
+directive @join__implements(graph: join__Graph!, interface: String!) repeatable on OBJECT | INTERFACE
+
+directive @join__type(graph: join__Graph!, key: join__FieldSet, extension: Boolean! = false, resolvable: Boolean! = true, isInterfaceObject: Boolean! = false) repeatable on OBJECT | INTERFACE | UNION | ENUM | INPUT_OBJECT | SCALAR
+
+directive @join__unionMember(graph: join__Graph!, member: String!) repeatable on UNION
+
+directive @link(url: String, as: String, for: link__Purpose, import: [link__Import]) repeatable on SCHEMA
+
+scalar Any
+  @join__type(graph: ORDERS)
+  @join__type(graph: USERS)
+
+input ExtraParams
+  @join__type(graph: ORDERS)
+  @join__type(graph: USERS)
+{
+  key: String
+  value: Any
+}
+
+input Filter
+  @join__type(graph: ORDERS)
+  @join__type(graph: USERS)
+{
+  key: String
+  value: String
+}
+
+scalar Int64
+  @join__type(graph: ORDERS)
+  @join__type(graph: USERS)
+
+scalar Int8
+  @join__type(graph: ORDERS)
+  @join__type(graph: USERS)
+
+scalar join__FieldSet
+
+enum join__Graph {
+  ORDERS @join__graph(name: "orders", url: "http://localhost:8081/gql/query")
+  USERS @join__graph(name: "users", url: "http://localhost:8080/gql/query")
+}
+
+scalar link__Import
+
+enum link__Purpose {
+  """
+  `SECURITY` features provide metadata necessary to securely resolve fields.
+  """
+  SECURITY
+
+  """
+  `EXECUTION` features provide metadata necessary for operation execution.
+  """
+  EXECUTION
+}
+
+scalar map
+  @join__type(graph: ORDERS)
+  @join__type(graph: USERS)
+
+type Order
+  @join__type(graph: ORDERS, key: "id")
+{
+  id: Int64!
+  user_id: Int64!
+  order_number: String!
+  total_amount: Float!
+  payment_method: String!
+  status: String!
+  created_at: Time!
+  updated_at: Time!
+  deleted_at: Time
+  order_items: [OrderItem!]!
+}
+
+type OrderItem
+  @join__type(graph: ORDERS)
+{
+  id: Int64!
+  order_id: Int64!
+  product_id: Int64!
+  product_name: String!
+  qty: Int!
+  price: Float!
+}
+
+type Pagination
+  @join__type(graph: ORDERS)
+  @join__type(graph: USERS)
+{
+  page: Int!
+  totalPages: Int!
+  totalItems: Int!
+  perPage: Int!
+  hasNext: Boolean!
+  hasPrevious: Boolean!
+}
+
+type Query
+  @join__type(graph: ORDERS)
+  @join__type(graph: USERS)
+{
+  getOrder(id: Int64!): ResponseOrder! @join__field(graph: ORDERS)
+  getOrderByUserId(id: Int64!, option: QueryOption): ResponseOrderList! @join__field(graph: ORDERS)
+  getUser(id: Int64!): ResponseUser! @join__field(graph: USERS)
+  getUserList(option: QueryOption): ResponseUserList! @join__field(graph: USERS)
+}
+
+input QueryOption
+  @join__type(graph: ORDERS)
+  @join__type(graph: USERS)
+{
+  condition: String
+  page: Int
+  limit: Int
+  order: String
+  filter: [Filter]
+  extraParams: [ExtraParams]
+}
+
+type ResponseOrder
+  @join__type(graph: ORDERS)
+{
+  items: Order!
+}
+
+type ResponseOrderList
+  @join__type(graph: ORDERS)
+{
+  items: [Order]!
+  pagination: Pagination!
+}
+
+type ResponseUser
+  @join__type(graph: USERS)
+{
+  items: User!
+}
+
+type ResponseUserList
+  @join__type(graph: USERS)
+{
+  items: [User]!
+  pagination: Pagination!
+}
+
+type Role
+  @join__type(graph: USERS)
+{
+  id: Int64!
+  role_name: String!
+  role_type: Int64!
+  created_at: Time!
+  updated_at: Time!
+  deleted_at: Time
+}
+
+scalar Time
+  @join__type(graph: ORDERS)
+  @join__type(graph: USERS)
+
+type User
+  @join__type(graph: ORDERS, key: "id")
+  @join__type(graph: USERS, key: "id")
+{
+  id: Int64!
+  orders: [Order!]! @join__field(graph: ORDERS)
+  name: String! @join__field(graph: USERS)
+  email: String! @join__field(graph: USERS)
+  created_at: Time! @join__field(graph: USERS)
+  updated_at: Time! @join__field(graph: USERS)
+  deleted_at: Time @join__field(graph: USERS)
+}
+
+type UserRole
+  @join__type(graph: USERS)
+{
+  id: Int64!
+  user_id: Int64!
+  role_id: Int64!
+  created_at: Time!
+  updated_at: Time!
+  deleted_at: Time
+}

@@ -1,0 +1,16 @@
+federation_version: 2
+
+subgraphs:
+  users:
+    routing_url: http://localhost:8080/gql/query
+    schema:
+      subgraph_url: http://localhost:8080/gql/query
+      introspection: true
+      
+  orders:
+    routing_url: http://localhost:8081/gql/query
+    schema:
+      subgraph_url: http://localhost:8081/gql/query
+      introspection: true
+  
+
